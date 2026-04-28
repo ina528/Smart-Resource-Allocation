@@ -1,6 +1,6 @@
 import streamlit as st
 
-st.title("🌍 Community Help Matcher")
+st.title("Community Help Matcher")
 
 # Temporary storage (like your lists)
 if "requests_list" not in st.session_state:
