@@ -1,41 +1,67 @@
-from flask import Flask, render_template, request, jsonify
+import streamlit as st
 
-app = Flask(__name__)
+st.title("🌍 Community Help Matcher")
 
-# Temporary storage (no DB)
-requests_list = []
-volunteers = []
+# Temporary storage (like your lists)
+if "requests_list" not in st.session_state:
+    st.session_state.requests_list = []
 
-@app.route('/')
-def home():
-    return render_template('index.html')
+if "volunteers" not in st.session_state:
+    st.session_state.volunteers = []
 
-@app.route('/add_request', methods=['POST'])
-def add_request():
-    data = request.json
-    requests_list.append(data)
-    return jsonify({"message": "Request added!"})
+# -----------------------
+# Add Help Request
+# -----------------------
+st.header("Add Help Request")
 
-@app.route('/add_volunteer', methods=['POST'])
-def add_volunteer():
-    data = request.json
-    volunteers.append(data)
-    return jsonify({"message": "Volunteer added!"})
+task = st.text_input("Task")
+req_location = st.text_input("Request Location")
 
-@app.route('/match', methods=['GET'])
-def match():
+if st.button("Submit Request"):
+    if task and req_location:
+        st.session_state.requests_list.append({
+            "task": task,
+            "location": req_location
+        })
+        st.success("Request added!")
+    else:
+        st.warning("Please fill all fields")
+
+# -----------------------
+# Add Volunteer
+# -----------------------
+st.header("Add Volunteer")
+
+name = st.text_input("Name")
+vol_location = st.text_input("Volunteer Location")
+
+if st.button("Register Volunteer"):
+    if name and vol_location:
+        st.session_state.volunteers.append({
+            "name": name,
+            "location": vol_location
+        })
+        st.success("Volunteer added!")
+    else:
+        st.warning("Please fill all fields")
+
+# -----------------------
+# Match Logic
+# -----------------------
+st.header("Find Matches")
+
+if st.button("Show Matches"):
     matches = []
 
-    for req in requests_list:
-        for vol in volunteers:
-            if req['location'].lower() == vol['location'].lower():
-                matches.append({
-                    "task": req['task'],
-                    "volunteer": vol['name'],
-                    "location": req['location']
-                })
+    for req in st.session_state.requests_list:
+        for vol in st.session_state.volunteers:
+            if req["location"].lower() == vol["location"].lower():
+                matches.append(
+                    f"{vol['name']} will help with {req['task']} at {req['location']}"
+                )
 
-    return jsonify(matches)
-
-if __name__ == '__main__':
-    app.run(debug=True)
+    if matches:
+        for m in matches:
+            st.write("✅", m)
+    else:
+        st.warning("No matches found")
