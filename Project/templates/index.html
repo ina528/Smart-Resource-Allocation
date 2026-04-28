@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Community Help Matcher</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<h1>Community Help Matcher</h1>
+
+<h2>Add Help Request</h2>
+<input id="task" placeholder="Task">
+<input id="req_location" placeholder="Location">
+<button onclick="addRequest()">Submit Request</button>
+
+<h2>Add Volunteer</h2>
+<input id="name" placeholder="Name">
+<input id="vol_location" placeholder="Location">
+<button onclick="addVolunteer()">Register Volunteer</button>
+
+<h2>Find Matches</h2>
+<button onclick="getMatches()">Show Matches</button>
+
+<ul id="results"></ul>
+
+<script>
+function addRequest() {
+    fetch('/add_request', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            task: document.getElementById('task').value,
+            location: document.getElementById('req_location').value
+        })
+    }).then(res => res.json()).then(data => alert(data.message));
+}
+
+function addVolunteer() {
+    fetch('/add_volunteer', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            name: document.getElementById('name').value,
+            location: document.getElementById('vol_location').value
+        })
+    }).then(res => res.json()).then(data => alert(data.message));
+}
+
+function getMatches() {
+    fetch('/match')
+    .then(res => res.json())
+    .then(data => {
+        let list = document.getElementById('results');
+        list.innerHTML = '';
+        data.forEach(item => {
+            let li = document.createElement('li');
+            li.innerText = `${item.volunteer} will help with ${item.task} at ${item.location}`;
+            list.appendChild(li);
+        });
+    });
+}
+</script>
+
+</body>
+</html>
